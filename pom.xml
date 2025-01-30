@@ -55,25 +55,37 @@
 			<scope>test</scope>
 		</dependency>
 		<!-- Deeplearning4j Core -->
-		<dependency>
+		<!--<dependency>
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-core</artifactId>
 			<version>1.0.0-M2.1</version>
 		</dependency>
 
-		<!-- ND4J Backend (CPU) -->
+		&lt;!&ndash; ND4J Backend (CPU) &ndash;&gt;
 		<dependency>
 			<groupId>org.nd4j</groupId>
 			<artifactId>nd4j-native-platform</artifactId>
 			<version>1.0.0-M2.1</version>
 		</dependency>
 
-		<!-- DataVec (for data loading) -->
+		&lt;!&ndash; DataVec (for data loading) &ndash;&gt;
 		<dependency>
 			<groupId>org.datavec</groupId>
 			<artifactId>datavec-api</artifactId>
 			<version>1.0.0-M2.1</version>
+		</dependency>-->
+
+		<dependency>
+			<groupId>org.bytedeco</groupId>
+			<artifactId>javacv-platform</artifactId>
+			<version>1.5.8</version>
 		</dependency>
+		<dependency>
+			<groupId>com.github.sarxos</groupId>
+			<artifactId>webcam-capture</artifactId>
+			<version>0.3.12</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
