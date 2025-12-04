@@ -52,7 +52,7 @@ def get_all_products(db: Session = Depends(get_db)):
         return db_products
 
 @app.get("/products/{product_id}")
-def get_product_by_id(product_id: int):
+def get_product_by_id(product_id: int, db: Session = Depends(get_db)):
     db_product = db.query(database_models.Product).filter(database_models.Product.id == product_id).first()
     if db_product:
         return db_product
@@ -60,16 +60,21 @@ def get_product_by_id(product_id: int):
 
 
 @app.post("/product")
-def add_product(product: Product):
-    products.append(product)
+def add_product(product: Product, db: Session = Depends(get_db)):
+    db.add(database_models.Product(**product.model_dump()))
+    db.commit()
     return product
 
 @app.put("/product")
-def update_product(id: int, product: Product):
-    for i in range(len(products)):
-        if products[i].id == id:
-            products[i] = product
-            return product
-        return {"error": "Product not found"}
+def update_product(id: int, product: Product, db: Session = Depends(get_db)):
+    db_product = db.query(database_models.Product).filter(database_models.Product.id == id).first()
+    if db_product:
+        db_product.name = product.name
+        db_product.price = product.price
+        db_product.description = product.description
+        db_product.quantity = product.quantity
+        db.commit()
+        return product
+    return {"error": "Product not found"}
 # if __name__ == "__main__":
 #     greet()
