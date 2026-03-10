@@ -151,4 +151,4 @@ To change ports, update:
 - [ ] Sentiment analysis
 - [ ] Multi-language support
 
-<div class="sp-embed-player" data-id="cOe6ernZUsY" data-aspect-ratio="1.777778" data-padding-top="56.250000%" style="position:relative;width:100%;padding-top:56.250000%;height:0;"><script src="https://go.screenpal.com/player/appearance/cOe6ernZUsY"></script><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"  scrolling="no" src="https://go.screenpal.com/player/cOe6ernZUsY?ff=1&ahc=1&dcc=1&tl=1&bg=transparent&share=1&download=1&embed=1&cl=1" allowfullscreen="true"></iframe></div>
+DEMO: https://screenpal.com/content/video/cOe6ernZUsY
