@@ -6,12 +6,15 @@ import dev.langchain4j.model.ollama.OllamaChatModel;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class ChatService {
     private final ChatLanguageModel chatModel;
     private final BusinessStorageService storageService;
-    private BusinessInfo businessInfo;
+
+    private Map<String, BusinessInfo> businessCache = new HashMap<>();
 
     public ChatService(BusinessStorageService storageService) {
         this.storageService = storageService;
@@ -20,31 +23,31 @@ public class ChatService {
                 .modelName("llama3.2")
                 .temperature(0.7)
                 .build();
+    }
 
-        try {
-            this.businessInfo = storageService.loadBusinessInfo();
-        } catch (IOException e) {
-            System.out.println("No existing business info found");
+    public void saveBusinessInfo(String businessId, BusinessInfo businessInfo) throws IOException {
+        businessInfo.setBusinessId(businessId);
+        storageService.saveBusinessInfo(businessId, businessInfo);
+        businessCache.put(businessId, businessInfo);
+    }
+
+    public BusinessInfo getBusinessInfo(String businessId) throws IOException {
+        if (!businessCache.containsKey(businessId)) {
+            BusinessInfo info = storageService.loadBusinessInfo(businessId);
+            if (info != null) {
+                businessCache.put(businessId, info);
+            }
         }
+        return businessCache.get(businessId);
     }
 
-    public void setBusinessInfo(BusinessInfo businessInfo) throws IOException {
-        this.businessInfo = businessInfo;
-        storageService.saveBusinessInfo(businessInfo);
-    }
-
-    public BusinessInfo getBusinessInfo() {
-        return businessInfo;
-    }
-
-    public String chat(String userMessage) {
+    public String chat(String businessId, String userMessage) throws IOException {
+        BusinessInfo businessInfo = getBusinessInfo(businessId);
         if (businessInfo == null) {
-            return "Please set up business information first.";
+            return "Business not found. Please select a valid business.";
         }
-
         String fullPrompt = businessInfo.toContextString() +
                 "\n\nCustomer Question: " + userMessage;
-
         return chatModel.generate(fullPrompt);
     }
 }

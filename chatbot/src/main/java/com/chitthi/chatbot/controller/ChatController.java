@@ -2,9 +2,10 @@ package com.chitthi.chatbot.controller;
 
 import com.chitthi.chatbot.model.BusinessInfo;
 import com.chitthi.chatbot.service.ChatService;
+import com.chitthi.chatbot.service.BusinessStorageService;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -12,53 +13,40 @@ import java.io.IOException;
 public class ChatController {
 
     private final ChatService chatService;
+    private final BusinessStorageService storageService;
 
-    public ChatController(ChatService chatService) {
+    public ChatController(ChatService chatService, BusinessStorageService storageService) {
         this.chatService = chatService;
+        this.storageService = storageService;
     }
 
-    @PostMapping("/business/setup")
-    public SetupResponse setupBusiness(@RequestBody BusinessInfo businessInfo) {
+    @PostMapping("/business/setup/{businessId}")
+    public SetupResponse setupBusiness(
+            @PathVariable String businessId,
+            @RequestBody BusinessInfo businessInfo) {
         try {
-            chatService.setBusinessInfo(businessInfo);
+            chatService.saveBusinessInfo(businessId, businessInfo);
             return new SetupResponse("Business information set successfully for " + businessInfo.getBusinessName());
-        } catch (IOException e)
-        {
-            return new SetupResponse("Error saving business info: "+ e.getMessage());
+        } catch (Exception e) {
+            return new SetupResponse("Error saving business information: " + e.getMessage());
         }
     }
 
-    @PostMapping("/chat/message")
-    public ChatResponse sendMessage(@RequestBody ChatRequest request) {
-        String response = chatService.chat(request.getMessage());
-        return new ChatResponse(response);
-    }
-
-    public static class ChatRequest {
-        private String message;
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
+    @GetMapping("/business/list")
+    public List<BusinessInfo> listBusinesses() {
+        try {
+            return storageService.getAllBusinesses();
+        } catch (Exception e) {
+            return List.of();
         }
     }
 
-    public static class ChatResponse {
-        private String response;
-
-        public ChatResponse(String response) {
-            this.response = response;
-        }
-
-        public String getResponse() {
-            return response;
-        }
-
-        public void setResponse(String response) {
-            this.response = response;
+    @GetMapping("/business/{businessId}")
+    public BusinessInfo getBusiness(@PathVariable String businessId) {
+        try {
+            return chatService.getBusinessInfo(businessId);
+        } catch (Exception e) {
+            return null;
         }
     }
 
@@ -72,7 +60,6 @@ public class ChatController {
         public String getMessage() {
             return message;
         }
-
         public void setMessage(String message) {
             this.message = message;
         }

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BusinessInfo {
+    private String businessId;
     private String businessName;
     private String businessType;
     private String operatingHours;

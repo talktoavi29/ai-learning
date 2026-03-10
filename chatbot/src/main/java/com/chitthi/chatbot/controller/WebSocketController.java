@@ -18,20 +18,26 @@ public class WebSocketController {
     @MessageMapping("/chat")
     @SendTo("/topic/messages")
     public ChatMessage chat(ChatMessage message) {
-        String response = chatService.chat(message.getContent());
-        return new ChatMessage("bot", response);
+        try {
+            String response = chatService.chat(message.getBusinessId(), message.getContent());
+            return new ChatMessage("bot", response, message.getBusinessId());
+        } catch (Exception e) {
+            return new ChatMessage("bot", "Error: " + e.getMessage(), message.getBusinessId());
+        }
     }
 
     @Data
     public static class ChatMessage {
         private String sender;
         private String content;
+        private String businessId;
 
         public ChatMessage() {}
 
-        public ChatMessage(String sender, String content) {
+        public ChatMessage(String sender, String content, String businessId) {
             this.sender = sender;
             this.content = content;
+            this.businessId = businessId;
         }
     }
 }

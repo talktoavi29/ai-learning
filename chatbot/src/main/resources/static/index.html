@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+        <html>
+        <head>
+        <title>AI Customer Service - Select Business</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        select:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .business-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .business-info.show {
+            display: block;
+        }
+        
+        .business-info h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .business-info p {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🤖 AI Customer Service</h1>
+    <p class="subtitle">Select a business to start chatting</p>
+
+    <div id="error-message" class="error"></div>
+
+    <div id="loading" class="loading">Loading businesses...</div>
+
+    <div id="business-selector" style="display: none;">
+        <label for="business-select">Choose a Business:</label>
+        <select id="business-select">
+            <option value="">-- Select a business --</option>
+        </select>
+
+        <div id="business-info" class="business-info">
+            <h3 id="info-name"></h3>
+            <p><strong>Type:</strong> <span id="info-type"></span></p>
+            <p><strong>Hours:</strong> <span id="info-hours"></span></p>
+            <p><strong>Location:</strong> <span id="info-location"></span></p>
+        </div>
+
+        <button id="start-chat" disabled>Start Chat</button>
+    </div>
+</div>
+
+<script>
+    const businessSelect = document.getElementById('business-select');
+    const startChatBtn = document.getElementById('start-chat');
+    const businessInfo = document.getElementById('business-info');
+    const loading = document.getElementById('loading');
+    const selector = document.getElementById('business-selector');
+    const errorDiv = document.getElementById('error-message');
+    
+    let businesses = [];
+    
+    // Load businesses on page load
+    async function loadBusinesses() {
+        try {
+            const response = await fetch('http://localhost:8080/api/business/list');
+            businesses = await response.json();
+            
+            if (businesses.length === 0) {
+                showError('No businesses found. Please set up at least one business first.');
+                return;
+            }
+            
+            // Populate dropdown
+            businesses.forEach((business, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = business.businessName;
+                businessSelect.appendChild(option);
+            });
+            
+            loading.style.display = 'none';
+            selector.style.display = 'block';
+            
+        } catch (error) {
+            showError('Failed to load businesses: ' + error.message);
+            loading.style.display = 'none';
+        }
+    }
+    
+    // Show business info when selected
+    businessSelect.addEventListener('change', function() {
+        const selectedIndex = this.value;
+        
+        if (selectedIndex === '') {
+            businessInfo.classList.remove('show');
+            startChatBtn.disabled = true;
+            return;
+        }
+        
+        const business = businesses[selectedIndex];
+        
+        document.getElementById('info-name').textContent = business.businessName;
+        document.getElementById('info-type').textContent = business.businessType;
+        document.getElementById('info-hours').textContent = business.operatingHours;
+        document.getElementById('info-location').textContent = business.location;
+        
+        businessInfo.classList.add('show');
+        startChatBtn.disabled = false;
+    });
+    
+    // Start chat
+    startChatBtn.addEventListener('click', function() {
+        const selectedIndex = businessSelect.value;
+        const business = businesses[selectedIndex];
+        
+        // Create business ID from name (lowercase, no spaces)
+        const businessId = business.businessName.toLowerCase().replace(/\s+/g, '-');
+        
+        // Redirect to chat with business ID
+        window.location.href = `chat.html?business=${businessId}`;
+    });
+    
+    function showError(message) {
+        errorDiv.textContent = message;
+        errorDiv.classList.add('show');
+    }
+    
+    // Load businesses on page load
+    loadBusinesses();
+</script>
+</body>
+</html></title>
+</head>
+<body>
+
+</body>
+</html>
